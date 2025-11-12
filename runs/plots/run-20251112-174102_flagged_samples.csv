@@ -1,0 +1,5 @@
+qid,question,answer,self_consistency_unique
+3,Who is Dr. David Lin?,professor of computer science,"['a professor of computer science', 'a professor of computer science at Southern Methodist University', 'a professor', 'professor of computer science']"
+14,What malfunction caused the Skysail drone crash?,hardware or software issues,"['software', 'hardware or software issues', 'hardware or software']"
+17,Which country signed the OceanNet data sharing pact first?,the United States,"['the United States', 'ratified', 'United States', 'all parties']"
+22,Which sponsor withdrew from the 2025 Global Health Forum?,major sponsors,"['no withdrawals', 'major sponsors', 'no withdrawals have been reported']"
