@@ -82,7 +82,7 @@ The code supports additional llama.cpp models when you set `MISTRAL_GGUF_PATH` a
    Outputs land in `runs/plots/`, including PNGs and a CSV mapping question indices to text.
 
 ## Detectors
-Two detectors run on every result:
+Three detectors currently run on every result. Each one targets a different hallucination signal: grounding, stability, and context dependence.
 
 ### Context Overlap (`detectors/context_overlap.py`)
 - Tokenizes answer and context, counts overlapping words.
@@ -101,6 +101,24 @@ Two detectors run on every result:
   - `diversity <= 0.4` → label **consistent**.
   - If the backend cannot sample → label **unsupported**.
 - Interpretation: if multiple runs disagree, the answer is unreliable even when the first pass looks plausible.
+
+### Context Ablation (`detectors/context_ablation.py`)
+- Splits the context into sentences.
+- Identifies the most supporting sentence for the baseline answer.
+- Removes that sentence to create an ablated context.
+- Regenerates the answer using the ablated context.
+- Computes answer similarity using token overlap:
+   - sensitivity=1−overlap_ratio(baseline,ablated)
+- Uses two thresholds:
+   - support_threshold = 0.2 → was the removed sentence meaningful?
+   - sensitivity_threshold = 0.3 → did the answer change?
+**Labels:**
+   - flag_context_ignored → The model gives the same answer even after removing the supporting sentence
+   → suggests reliance on parametric knowledge, not context
+   - context_sensitive → The answer changes when evidence is removed
+   - insufficient → Context too short or no meaningful support detected
+- Interpretation: this detector reveals whether the model actually uses the provided context. Answers that survive ablation unchanged often indicate hallucinated confidence.
+
 
 Combining both detectors helps separate *ungrounded* answers from *unstable* ones.
 
