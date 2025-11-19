@@ -50,12 +50,16 @@ def unpack_detectors(df: pd.DataFrame) -> pd.DataFrame:
         return get_detector(row, detector).get(key, default)
 
     df = df.copy()
+
+    # Context overlap
     df["context_overlap_score"] = df.apply(
         lambda row: get_detector_value(row, "context_overlap", "score"), axis=1
     )
     df["context_overlap_label"] = df.apply(
         lambda row: get_detector_value(row, "context_overlap", "label"), axis=1
     )
+
+    # Self-consistency
     df["self_consistency_score"] = df.apply(
         lambda row: get_detector_value(row, "self_consistency", "score"), axis=1
     )
@@ -71,12 +75,24 @@ def unpack_detectors(df: pd.DataFrame) -> pd.DataFrame:
         ).get("unique_replies", []),
         axis=1,
     )
+
+    # Context ablation (new)
+    df["context_ablation_score"] = df.apply(
+        lambda row: get_detector_value(row, "context_ablation", "score"), axis=1
+    )
+    df["context_ablation_label"] = df.apply(
+        lambda row: get_detector_value(row, "context_ablation", "label"), axis=1
+    )
+
+    # Any detector flagged? (treat context_ablation 'flag_context_ignored' as flag)
     df["flagged"] = df.apply(
         lambda row: any(
             label == "flag"
+            or label == "flag_context_ignored"
             for label in (
                 row.get("context_overlap_label"),
                 row.get("self_consistency_label"),
+                row.get("context_ablation_label"),
             )
             if label
         ),
@@ -90,7 +106,11 @@ def plot_detector_counts(df: pd.DataFrame, output_path: Path) -> None:
         pd.melt(
             df,
             id_vars=["question"],
-            value_vars=["context_overlap_label", "self_consistency_label"],
+            value_vars=[
+                "context_overlap_label",
+                "self_consistency_label",
+                "context_ablation_label",  # new
+            ],
             var_name="detector",
             value_name="label",
         )
@@ -101,7 +121,7 @@ def plot_detector_counts(df: pd.DataFrame, output_path: Path) -> None:
 
     counts["detector"] = counts["detector"].str.replace("_label", "", regex=False)
     sns.set_theme(style="whitegrid")
-    plt.figure(figsize=(8, 4))
+    plt.figure(figsize=(9, 4))
     sns.barplot(data=counts, x="detector", y="count", hue="label", palette="deep")
     plt.title("Detector label counts")
     plt.ylabel("Count")
@@ -154,12 +174,11 @@ def plot_flagged_question_bars(df: pd.DataFrame, output_path: Path) -> None:
     df = df.copy()
     df["flag_count"] = df.apply(
         lambda row: sum(
-            label == "flag"
-            for label in (
-                row.get("context_overlap_label"),
-                row.get("self_consistency_label"),
+            (
+                row.get("context_overlap_label") == "flag",
+                row.get("self_consistency_label") == "flag",
+                row.get("context_ablation_label") == "flag_context_ignored",
             )
-            if label
         ),
         axis=1,
     )
@@ -187,13 +206,14 @@ def plot_flag_matrix(df: pd.DataFrame, output_path: Path) -> None:
         {
             "context_overlap": (df["context_overlap_label"] == "flag").astype(int),
             "self_consistency": (df["self_consistency_label"] == "flag").astype(int),
+            "context_ablation": (df["context_ablation_label"] == "flag_context_ignored").astype(int),
         },
         index=df["qid"],
     )
 
     cmap = ListedColormap(["#f0f0f0", "#d62728"])
     sns.set_theme(style="white")
-    plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(7, 6))
     annot_values = matrix.values.astype(int)
     sns.heatmap(
         matrix,

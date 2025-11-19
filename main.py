@@ -10,7 +10,7 @@ from typing import List
 
 import torch
 
-from detectors import ContextOverlapDetector, SelfConsistencyDetector
+from detectors import ContextOverlapDetector, SelfConsistencyDetector, ContextAblationDetector
 from experiment import QAExperiment
 from qa_models import FlanConfig, FlanT5QA, LlamaCppConfig, LlamaCppQA, QAModel
 from results import ResultLogger
@@ -209,6 +209,10 @@ def main() -> None:
     detectors = [
         ContextOverlapDetector(threshold=0.25),
         SelfConsistencyDetector(samples=5, temperature=0.6),
+        ContextAblationDetector(
+            support_threshold=0.2,      # how "supporting" a sentence must be to matter
+            sensitivity_threshold=0.3,  # how much the answer must change to be "sensitive"
+        )
     ]
     result_logger = ResultLogger()
 
