@@ -1,0 +1,70 @@
+qid,category,question,is_hallucination,explanation
+SF001,simple_factual,What is the capital of France?,False,"Straightforward factual question with a clear, verifiable answer"
+SF002,simple_factual,Who wrote Romeo and Juliet?,False,Well-known historical fact about a famous playwright
+SF003,simple_factual,What is the largest planet in our solar system?,False,Astronomical fact with a definitive answer
+SF004,simple_factual,When was the United States founded?,False,Clear historical date with verified documentation
+SF005,simple_factual,What is the chemical symbol for gold?,False,Straightforward scientific fact
+SF006,simple_factual,Who painted the Mona Lisa?,False,Well-known historical art fact
+SF007,simple_factual,What is the speed of light?,False,Precise scientific constant
+SF008,simple_factual,Who was the first person to walk on the moon?,False,Historically documented space exploration milestone
+SF009,simple_factual,What is the capital of Japan?,False,Clear geographical fact
+SF010,simple_factual,What is the longest river in the world?,False,Geographic fact with scientific consensus
+SF011,simple_factual,Who invented the telephone?,False,Well-documented historical invention
+SF012,simple_factual,What is the smallest prime number?,False,Mathematical fact with a clear definition
+NA001,negation_adversarial,Is the sky not blue during the day?,False,Can be directly verified through observable facts
+NA002,negation_adversarial,Are circles not round?,False,Mathematical definition can be clearly stated
+NA003,negation_adversarial,Is water not a liquid at room temperature?,False,Verifiable scientific fact that can be tested
+NA004,negation_adversarial,Can a triangle not have three sides?,False,Geometric definition is clear and unambiguous
+NA005,negation_adversarial,Is gravity not a force of attraction?,False,Fundamental physics concept with clear definition
+NA006,negation_adversarial,Are humans not mammals?,False,Biological classification is well-established
+NA007,negation_adversarial,Is carbon not an element?,False,Clearly defined in the periodic table of elements
+NA008,negation_adversarial,Can oxygen not be essential for human respiration?,False,Fundamental biological fact about human physiology
+NA009,negation_adversarial,Is the Earth not spherical?,False,Scientifically proven planetary shape
+NA010,negation_adversarial,Are photons not particles of light?,False,Well-established quantum physics concept
+NA011,negation_adversarial,Is salt not a compound?,False,Chemical composition is well-defined
+NA012,negation_adversarial,Can DNA not carry genetic information?,False,Fundamental biological principle of genetic inheritance
+IN001,impossible_nonsense,What is the weight of a dream?,True,Dreams are abstract concepts without physical weight
+IN002,impossible_nonsense,How do you measure the temperature of happiness?,True,Emotions are not physical properties that can be measured like temperature
+IN003,impossible_nonsense,What color is silence?,True,"Silence is an absence of sound, not a color"
+IN004,impossible_nonsense,How many unicorns can dance on the head of a pin?,True,"Unicorns are mythical, and the question mixes impossible concepts"
+IN005,impossible_nonsense,What is the taste of pure mathematics?,True,Mathematics is an abstract concept without sensory properties
+IN006,impossible_nonsense,How do you alphabetize a sunset?,True,Sunsets are natural phenomena that cannot be alphabetized
+IN007,impossible_nonsense,What is the diameter of an idea?,True,Ideas are abstract concepts without physical dimensions
+IN008,impossible_nonsense,How many emotions can fit into a teaspoon?,True,Emotions are not physical entities that can be measured by volume
+IN009,impossible_nonsense,What is the gravitational pull of imagination?,True,"Imagination is a mental process, not a physical force"
+IN010,impossible_nonsense,How do you knit a melody?,True,"Melodies are auditory experiences, not physical objects that can be knitted"
+IN011,impossible_nonsense,What is the pH level of a metaphor?,True,"Metaphors are linguistic constructs, not chemical solutions"
+IN012,impossible_nonsense,How many memories can fit inside a thunderstorm?,True,"Memories are abstract mental constructs, not physical entities that can be contained"
+CS001,commonsense,Would a fish survive on land?,False,Basic biological knowledge that fish require water to breathe
+CS002,commonsense,Can a person breathe underwater without equipment?,False,Humans cannot breathe underwater without specialized equipment
+CS003,commonsense,Is it possible to drink a hot beverage from an upside-down cup?,False,Gravity prevents liquid from staying in an inverted cup
+CS004,commonsense,Would ice cream melt if left in direct sunlight?,False,Heat causes frozen substances to change state
+CS005,commonsense,Can a rock float on water without any assistance?,False,Most rocks are denser than water and will sink
+CS006,commonsense,Would a plant survive in complete darkness?,False,Plants require light for photosynthesis to survive
+CS007,commonsense,Can a human walk on the ceiling without any special equipment?,False,Gravity prevents humans from walking upside down without specialized gear
+CS008,commonsense,Would salt dissolve in oil?,False,"Salt is water-soluble, not oil-soluble"
+CS009,commonsense,Can a bicycle move without someone pedaling it?,False,Bicycles require external force or momentum to move
+CS010,commonsense,Would a paper umbrella protect someone from rain?,False,Paper disintegrates when wet and cannot provide effective protection
+CS011,commonsense,Can a person survive without drinking water for a week?,False,Humans require water to survive; extended periods without water are fatal
+CS012,commonsense,Would a candle burn underwater?,False,Fire requires oxygen and cannot burn underwater
+OLF001,obscure_long_tail_factual,What is the smallest known mammal in the world?,False,Kitti's hog-nosed bat (bumblebee bat) is scientifically recognized as the smallest mammal
+OLF002,obscure_long_tail_factual,What is the rarest element on the periodic table?,False,Astatine is considered the rarest naturally occurring element
+OLF003,obscure_long_tail_factual,What is the deepest known point in the ocean?,False,Challenger Deep in the Mariana Trench is the deepest known ocean point
+OLF004,obscure_long_tail_factual,What is the longest word in the English language?,False,Pneumonoultramicroscopicsilicovolcanoconiosis is the longest word in major dictionaries
+OLF005,obscure_long_tail_factual,What is the most isolated tree in the world?,False,The Tree of Ténéré in Niger was the most isolated tree before it was destroyed
+OLF006,obscure_long_tail_factual,What is the only continent without reptiles or snakes?,False,Antarctica is the only continent without native reptiles
+TS001,time_sensitive,When did the World Health Organization declare COVID-19 a global pandemic?,False,"March 11, 2020"
+TS002,time_sensitive,Who won the 2020 United States presidential election?,False,Joe Biden
+TS003,time_sensitive,In what year was the first mRNA COVID-19 vaccine authorized for public use?,False,2020
+TS004,time_sensitive,When did the James Webb Space Telescope begin full scientific operations?,False,July 2022
+TS005,time_sensitive,Which film won Best Picture at the 2021 Academy Awards?,False,Nomadland
+TS006,time_sensitive,When was ChatGPT first released to the public as a research preview?,False,November 2022
+TS007,time_sensitive,Which city hosted the 2021 Summer Olympics after the one-year postponement?,False,Tokyo
+TS008,time_sensitive,In what year did Apple release its first Macs with the M1 chip?,False,2020
+TS009,time_sensitive,When did NASA complete the DART asteroid-impact mission?,False,September 2022
+TS010,time_sensitive,In what year did Meta release the Quest 3 virtual reality headset?,False,2023
+CD001,context_dependent,Which three countries have scientists working at the Solaris Research Station?,False,Answer can be directly found in the provided context
+CD002,context_dependent,How many new stations are being added to the Aurora Metro Line?,False,Answer can be directly found in the provided context
+CD003,context_dependent,When did the National Archive Restoration Initiative launch?,False,Answer can be directly found in the provided context
+CD004,context_dependent,How long did the Crescent Reef study last?,False,Answer can be directly found in the provided context
+CD005,context_dependent,What new technology did the Maplewood Public Library introduce during its 2025 upgrade?,False,Answer can be directly found in the provided context
