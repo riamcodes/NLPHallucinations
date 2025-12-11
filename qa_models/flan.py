@@ -59,6 +59,7 @@ class FlanT5QA(QAModel):
         )
 
     def answer(self, question: str, context: str) -> Dict[str, Any]:
+        """Deterministic baseline answer using greedy decoding (no sampling)."""
         if not self._model or not self._tokenizer:
             return self.mark_failed("Model not loaded yet.")
 
@@ -73,11 +74,12 @@ class FlanT5QA(QAModel):
         if self.config.device:
             inputs = {key: value.to(self.config.device) for key, value in inputs.items()}
 
+        # For the baseline, we want *greedy* decoding with no sampling.
+        # To avoid warnings about temperature/top_p being ignored, we do NOT
+        # set them here – only max_new_tokens + do_sample=False.
         generation_config = GenerationConfig(
             max_new_tokens=self.config.max_new_tokens,
-            temperature=self.config.temperature,
-            top_p=self.config.top_p,
-            do_sample=self.config.temperature > 0.0,
+            do_sample=False,
         )
 
         with torch.no_grad():
@@ -92,7 +94,8 @@ class FlanT5QA(QAModel):
             "model": self.name,
             "answer": answer,
             "metadata": {
-                "temperature": self.config.temperature,
+                # Explicitly record that this was a greedy baseline run.
+                "temperature": 0.0,
                 "max_new_tokens": self.config.max_new_tokens,
                 "top_p": self.config.top_p,
             },

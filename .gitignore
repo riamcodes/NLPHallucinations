@@ -1,3 +1,15 @@
 venv/
 nlpenv/
 *.env
+
+__pycache__/
+
+runs/
+
+outputs/*
+!outputs/question_set_v1.json
+!outputs/gold_labels.csv
+!outputs/dataset_design.md
+.DS_Store
+__pycache__/
+runs/

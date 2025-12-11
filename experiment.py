@@ -38,7 +38,19 @@ class QAExperiment:
                 question = item.get("question", "")
                 context = item.get("context", "")
                 result = model.answer(question=question, context=context)
-                result.update({"question": question, "context": context})
+
+                result.update(
+                    {
+                        "qid": item.get("qid"),
+                        "category": item.get("category"),
+                        "question": question,
+                        "context": context,
+                        # carry through the per-question "risk" label
+                        "gold_is_hallucination": (item.get("gold_label") or {}).get(
+                            "is_hallucination"
+                        ),
+                    }
+                )
 
                 detections = {}
                 for detector in self.detectors:

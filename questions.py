@@ -651,12 +651,17 @@ CONTEXT_DEPENDENT_QUESTIONS = [
     }
 ]
 
-def load_question_set(path: Path | None = None) -> List[Dict[str, Any]]:
-    """
-    Load consolidated question set (with qid, category, gold_label, etc)
-    Defaults to outputs/question_set_v1.json
-    """
-    path = path or OUTPUTS_DIR / "question_set_v1.json"
+def load_question_set():
+    # Person A moved the question set to the data/ directory
+    path = Path("data/question_set_v1.json")
+
+    if not path.exists():
+        raise FileNotFoundError(
+            f"Expected question set at {path}, but it does not exist. "
+            "Make sure the file is committed by Person A."
+        )
+
     with path.open("r", encoding="utf-8") as f:
         data = json.load(f)
+
     return data
