@@ -9,7 +9,9 @@ from typing import Any, Dict, List, Optional
 import torch
 from transformers import (
     AutoModelForSeq2SeqLM,
+    AutoModelForCausalLM,
     AutoTokenizer,
+    AutoConfig,
     GenerationConfig,
 )
 
@@ -37,26 +39,52 @@ class FlanT5QA(QAModel):
         super().__init__(name=name)
         self.config = config or FlanConfig()
         self._tokenizer: Optional[AutoTokenizer] = None
-        self._model: Optional[AutoModelForSeq2SeqLM] = None
+        self._model: Optional[Any] = None  # Can be Seq2SeqLM or CausalLM
+        self._is_causal: bool = False  # Track if this is a causal LM
 
     def load(self) -> None:
         """Load tokenizer and model weights."""
-        logger.info("Loading FLAN-T5 model %s", self.config.model_name)
+        logger.info("Loading model %s", self.config.model_name)
         self._tokenizer = AutoTokenizer.from_pretrained(self.config.model_name)
-        self._model = AutoModelForSeq2SeqLM.from_pretrained(self.config.model_name)
+        
+        # Detect model type: check if it's a causal LM or seq2seq
+        config = AutoConfig.from_pretrained(self.config.model_name)
+        if hasattr(config, 'is_encoder_decoder') and config.is_encoder_decoder:
+            # Encoder-decoder model (T5, FLAN-T5, etc.)
+            logger.info("Detected encoder-decoder model, using AutoModelForSeq2SeqLM")
+            self._model = AutoModelForSeq2SeqLM.from_pretrained(self.config.model_name)
+            self._is_causal = False
+        else:
+            # Decoder-only causal LM (TinyLlama, GPT, etc.)
+            logger.info("Detected causal LM, using AutoModelForCausalLM")
+            self._model = AutoModelForCausalLM.from_pretrained(self.config.model_name)
+            self._is_causal = True
+            # For causal LMs, we need to add padding token if not present
+            if self._tokenizer.pad_token is None:
+                self._tokenizer.pad_token = self._tokenizer.eos_token
 
         if self.config.device:
-            logger.info("Moving FLAN-T5 to device %s", self.config.device)
+            logger.info("Moving model to device %s", self.config.device)
             self._model.to(self.config.device)
 
         self._model.eval()
 
     def _build_prompt(self, question: str, context: str) -> str:
-        return (
-            "You are a helpful assistant. Answer the question using the provided context.\n\n"
-            f"Context:\n{context}\n\n"
-            f"Question: {question}\nAnswer:"
-        )
+        # For chat models, use a more structured format
+        if self._is_causal:
+            # Use a format that works better for causal LMs
+            return (
+                f"Context: {context}\n\n"
+                f"Question: {question}\n"
+                f"Answer:"
+            )
+        else:
+            # Original format for seq2seq models
+            return (
+                "You are a helpful assistant. Answer the question using the provided context.\n\n"
+                f"Context:\n{context}\n\n"
+                f"Question: {question}\nAnswer:"
+            )
 
     def answer(self, question: str, context: str) -> Dict[str, Any]:
         """Deterministic baseline answer using greedy decoding (no sampling)."""
@@ -80,7 +108,21 @@ class FlanT5QA(QAModel):
         generation_config = GenerationConfig(
             max_new_tokens=self.config.max_new_tokens,
             do_sample=False,
+            pad_token_id=self._tokenizer.pad_token_id if self._is_causal else None,
         )
+
+        # For causal LMs, add stop sequences to prevent over-generation
+        stop_sequences = None
+        if self._is_causal:
+            # Stop on newlines or question markers that might indicate continuation
+            stop_sequences = ["\n\nQuestion:", "\n\nContext:", "\n\nAnswer:"]
+            stop_token_ids = []
+            for seq in stop_sequences:
+                tokens = self._tokenizer.encode(seq, add_special_tokens=False)
+                if tokens:
+                    stop_token_ids.append(tokens[0])  # Use first token of each sequence
+            if stop_token_ids:
+                generation_config.eos_token_id = stop_token_ids[0] if stop_token_ids else self._tokenizer.eos_token_id
 
         with torch.no_grad():
             outputs = self._model.generate(
@@ -88,7 +130,20 @@ class FlanT5QA(QAModel):
                 generation_config=generation_config,
             )
 
-        answer = self._tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
+        # For causal LMs, we need to extract only the newly generated tokens
+        if self._is_causal:
+            # Remove the input prompt from the output
+            input_length = inputs['input_ids'].shape[1]
+            generated_tokens = outputs[0][input_length:]
+            answer = self._tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
+            # Stop at first newline or question marker to prevent continuation
+            for stop_seq in ["\n\nQuestion:", "\n\nContext:", "\n\nAnswer:", "\n\n"]:
+                if stop_seq in answer:
+                    answer = answer.split(stop_seq)[0].strip()
+                    break
+        else:
+            # For seq2seq models, the output is already just the generated part
+            answer = self._tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
 
         return {
             "model": self.name,
@@ -132,6 +187,7 @@ class FlanT5QA(QAModel):
             temperature=temp,
             top_p=tp,
             do_sample=True,
+            pad_token_id=self._tokenizer.pad_token_id if self._is_causal else None,
         )
 
         with torch.no_grad():
@@ -141,8 +197,23 @@ class FlanT5QA(QAModel):
                 num_return_sequences=num_samples,
             )
 
-        return [
-            self._tokenizer.decode(output, skip_special_tokens=True).strip()
-            for output in outputs
-        ]
+        # For causal LMs, extract only newly generated tokens
+        if self._is_causal:
+            input_length = inputs['input_ids'].shape[1]
+            answers = []
+            for output in outputs:
+                generated_tokens = output[input_length:]
+                answer = self._tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
+                # Stop at first newline or question marker to prevent continuation
+                for stop_seq in ["\n\nQuestion:", "\n\nContext:", "\n\nAnswer:", "\n\n"]:
+                    if stop_seq in answer:
+                        answer = answer.split(stop_seq)[0].strip()
+                        break
+                answers.append(answer)
+            return answers
+        else:
+            return [
+                self._tokenizer.decode(output, skip_special_tokens=True).strip()
+                for output in outputs
+            ]
 

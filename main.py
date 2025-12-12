@@ -48,6 +48,18 @@ def build_models() -> List[QAModel]:
         )
     )
 
+    # Add TinyLlama using the same FlanT5QA interface
+    # Using the chat version which is more commonly available
+    models.append(
+        FlanT5QA(
+            name="tinyllama-1.1b",
+            config=FlanConfig(
+                model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+                device=device,
+            ),
+        )
+    )
+
     mistral_path = os.getenv("MISTRAL_GGUF_PATH")
     if mistral_path:
         models.append(
